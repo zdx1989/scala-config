@@ -41,8 +41,8 @@ object ConfigReader {
 
   implicit def optionConfigReader[A](implicit cra: ConfigReader[A]): ConfigReader[Option[A]] =
     instance(result { (config, path) =>
-        if (!config.hasPath(path)) None
-        else Some(cra.read(config, path).fold(e => throw e, identity))
+      if (!config.hasPath(path)) None
+      else Some(cra.read(config, path).fold(e => throw e, identity))
     })
 
 }

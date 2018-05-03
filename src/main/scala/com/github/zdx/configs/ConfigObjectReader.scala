@@ -45,7 +45,8 @@ object ConfigObjectReader {
     }
 
   implicit def genericConfigReader[A, R](implicit
-                                        gen: Generic.Aux[A, R], crr: ConfigObjectReader[R]): ConfigReader[A] =
+                                         gen: Generic.Aux[A, R],
+                                         crr: ConfigObjectReader[R]): ConfigReader[A] =
     new ConfigReader[A] {
       override def read(config: Config, path: String): Result[A] = {
         import scala.collection.JavaConversions._
