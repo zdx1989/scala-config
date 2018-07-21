@@ -1,8 +1,10 @@
 package com.github.zdx.configs
 
 import java.time.Duration
+
 import com.github.zdx.configs.ConfigReader.Result
 import com.typesafe.config.{Config, ConfigException}
+
 
 
 /**
@@ -44,5 +46,42 @@ object ConfigReader {
       if (!config.hasPath(path)) None
       else Some(cra.read(config, path).fold(e => throw e, identity))
     })
+
+  implicit def mapConfigReader[A](implicit
+                                  mc: ConfigReader[A]): ConfigReader[Map[String, A]] =
+    instance { (config, path) =>
+      val obj = config.getObject(path)
+      val root = obj.toConfig
+      import scala.collection.JavaConversions._
+      val paths = obj.unwrapped().keySet().toList
+      val res = paths.map { key =>
+        mc.read(root, key).right.map(key -> _)
+      }
+      sequence(res).right.map(_.toMap)
+    }
+
+  implicit def mapListConfigReader[A](implicit
+                                      mlc: ConfigListReader[A]): ConfigReader[Map[String, List[A]]] =
+    instance { (config, path) =>
+      val obj = config.getObject(path)
+      val root = obj.toConfig
+      import scala.collection.JavaConversions._
+      val paths = obj.unwrapped().keySet().toList
+      val res = paths.map { key =>
+        mlc.read(root, key).right.map(key -> _)
+      }
+      sequence(res).right.map(_.toMap)
+    }
+
+  def sequence[A](ra: List[Result[(String, A)]]): Result[List[(String, A)]] = {
+    def loop(n: Int, res: Result[List[(String, A)]]): Result[List[(String, A)]] = n match {
+      case m if m < 0 => res
+      case _ => ra(n) match {
+        case Left(e) => Left(e)
+        case Right(a) => loop(n - 1, res.right.map(a :: _))
+      }
+    }
+    loop(ra.length - 1, Right(Nil))
+  }
 
 }

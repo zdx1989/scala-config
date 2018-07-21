@@ -39,6 +39,39 @@ scala> ConfigReader[User].read(config, "user")
 res5: com.github.zdx.configs.ConfigReader.Result[User] = Right(User(zdx,29))
 ```
 
+通过ConfigReader获取Map[String, A]配置信息
+```scala
+scala> val config = ConfigFactory.parseString(
+|        """
+|        |user {
+|        | name = zdx
+|        | age = 29
+|        |}
+|        """.stripMargin)
+config: com.typesafe.config.Config = Config(SimpleConfigObject({"user":{"age":29,"name":"zdx"}}))
+
+scala> import com.github.zdx.configs._
+import com.github.zdx.configs._
+
+scala> ConfigReader[Map[String, String]].read(config, "user")
+res1: com.github.zdx.configs.ConfigReader.Result[Map[String,String]] = Right(Map(name -> zdx, age -> 29))
+```
+
+通过ConfigReader获取Map[String, List[A]]配置信息
+```scala
+scala> val config = ConfigFactory.parseString(
+|        """
+|        |user {
+|        | name = [zdx, ygy]
+|        | age = [29, 18]
+|        |}
+|        """.stripMargin)
+config: com.typesafe.config.Config = Config(SimpleConfigObject({"user":{"age":[29,18],"name":["zdx","ygy"]}}))
+
+scala> ConfigReader[Map[String, List[String]]].read(config, "user")
+res2: com.github.zdx.configs.ConfigReader.Result[Map[String,List[String]]] = Right(Map(name -> List(zdx, ygy), age -> List(29, 18)))
+```
+
 ## 通过Config获取配置信息
 
 通过Config获取基础配置信息

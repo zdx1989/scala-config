@@ -40,6 +40,33 @@ class ConfigSpec extends FunSpec with Matchers {
       ConfigReader[User].read(config, "user") should be (Right(User("zdx", 29)))
     }
 
+    it("should get Map[String, A] from ConfigReader") {
+      val config = ConfigFactory.parseString(
+        """
+          |user {
+          | name = zdx
+          | age = 29
+          |}
+        """.stripMargin)
+      val actual = ConfigReader[Map[String, String]].read(config, "user")
+      val expected = Right(Map("name" -> "zdx", "age" -> "29"))
+      actual should be (expected)
+    }
+
+    it("shoud get Map[String, List[A]] from ConfigReader") {
+      val config = ConfigFactory.parseString(
+        """
+          |user {
+          | name = [zdx, ygy]
+          | age = [29, 18]
+          |}
+        """.stripMargin
+      )
+      val actual = ConfigReader[Map[String, List[String]]].read(config, "user")
+      val expected = Right(Map("name" -> List("zdx", "ygy"), "age" -> List("29", "18")))
+      actual should be (expected)
+    }
+
     it("should get List[A <: AnyVal] from ConfigListReader") {
       val config = ConfigFactory.parseString(
         """
